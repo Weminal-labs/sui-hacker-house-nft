@@ -1,13 +1,18 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Routes, Route } from 'react-router-dom'
 import './App.css'
 import './index.css'
+import { AuthPage } from './pages/AuthPage'
+import { HomePage } from './pages/HomePage'
 
 function App() {
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
-      <p className='h-auto w-auto'>Build something</p>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/auth" element={<AuthPage />} />
+        {/* Add more routes here */}
+      </Routes>
     </div>
   )
 }
