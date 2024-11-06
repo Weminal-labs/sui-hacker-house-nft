@@ -1,5 +1,6 @@
 import { useEnokiFlow } from '@mysten/enoki/react';
 import { config } from '../config/env'
+import { FaGoogle } from 'react-icons/fa';
 
 export function EnokiLogin() {
 	const enokiFlow = useEnokiFlow();
@@ -30,6 +31,9 @@ export function EnokiLogin() {
 	};
 
 	return (
-		<button onClick={handleSignIn}>Sign in with Google</button>
+		<div onClick={handleSignIn} className='flex justify-center items-center gap-2 hover:cursor-pointer'>
+			<FaGoogle className="w-5 h-5" />
+			<span>Login with Google</span>
+		</div>
 	);
 }
