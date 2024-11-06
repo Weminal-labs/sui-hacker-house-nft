@@ -4,6 +4,8 @@ import { uploadImage } from './services/uploadService'
 import './App.css'
 import Layout from './components/Layout'
 import Profile from './components/Profile'
+import { Route, Routes } from 'react-router-dom'
+import { AuthPage } from './pages/AuthPage'
 
 function App() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
@@ -154,7 +156,11 @@ function App() {
         </div>
 
         {/* Content Overlay */}
-        {renderContent()}
+        <Routes>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/" element={renderContent()} />
+          {/* Add more routes here */}
+        </Routes>
       </div>
     </Layout>
   )

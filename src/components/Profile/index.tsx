@@ -2,6 +2,8 @@ import { motion } from 'framer-motion'
 import { FaWallet, FaCopy } from 'react-icons/fa'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useEnokiFlow } from '@mysten/enoki/react'
+import { EnokiLogin } from '../EnokiLogin'
 
 interface GalleryItem {
   id: number
@@ -154,10 +156,19 @@ const ImagePreview = ({ image, title, onClose }: ImagePreviewProps) => {
 
 export default function Profile() {
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
-  const walletAddress = "0x1234...5678"
+  const enokiFlow = useEnokiFlow();
+  const zkLoginState = enokiFlow.$zkLoginState.get();
+  const address = zkLoginState.address;
 
   const copyAddress = () => {
-    navigator.clipboard.writeText(walletAddress)
+    if (address) {
+      navigator.clipboard.writeText(address)
+    }
+  }
+
+  const handleLogout = () => {
+    enokiFlow.logout();
+    window.location.reload();
   }
 
   return (
@@ -165,20 +176,34 @@ export default function Profile() {
       <div className="bg-white/10 backdrop-blur-xl rounded-[40px] py-8 border border-white/20">
         {/* Wallet Section */}
         <div className="mb-8">
-          <div className="flex items-center justify-between px-8">
-            <div className="flex items-center gap-3">
-              <FaWallet className="text-white w-6 h-6" />
-              <h2 className="text-white text-xl font-bold">Wallet Address</h2>
-            </div>
-            <button
-              onClick={copyAddress}
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-            >
-              <FaCopy className="w-4 h-4" />
-              <span className="text-sm">Copy</span>
-            </button>
-          </div>
-          <p className="text-white/90 font-mono mt-2 px-8">{walletAddress}</p>
+          {!address ? (
+            <EnokiLogin />
+          ) : (
+            <>
+              <div className="flex items-center justify-between px-8">
+                <div className="flex items-center gap-3">
+                  <FaWallet className="text-white w-6 h-6" />
+                  <h2 className="text-white text-xl font-bold">Wallet Address</h2>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={copyAddress}
+                    className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+                  >
+                    <FaCopy className="w-4 h-4" />
+                    <span className="text-sm">Copy</span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+              <p className="text-white/90 font-mono mt-2 px-8">{address}</p>
+            </>
+          )}
         </div>
 
         {/* Gallery Grid */}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FaBars, FaTimes, FaGithub, FaTwitter, FaDiscord, FaHome, FaInfoCircle, FaCloudUploadAlt, FaUser } from 'react-icons/fa'
+import { FaBars, FaTimes, FaGithub, FaTwitter, FaDiscord, FaInfoCircle, FaCloudUploadAlt, FaUser } from 'react-icons/fa'
 import { Toaster } from 'react-hot-toast'
 
 interface LayoutProps {
