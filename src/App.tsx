@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { toast } from 'react-hot-toast'
-import { uploadImage } from './services/uploadService'
+import { uploadToWalrus } from './services/uploadService'
 import './App.css'
 import Layout from './components/Layout'
 import Profile from './components/Profile'
@@ -13,12 +13,22 @@ function App() {
   const [contractAddress, setContractAddress] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [currentPage, setCurrentPage] = useState('upload')
+  const [epochs, setEpochs] = useState(1)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedDay, setSelectedDay] = useState(1);
+  const [proofObjectId, setProofObjectId] = useState<string | null>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size must be less than 10MB');
+        return;
+      }
+
       const previewUrl = URL.createObjectURL(file)
       setSelectedImage(previewUrl)
+      setSelectedFile(file)
     }
   }
 
@@ -26,32 +36,44 @@ function App() {
     e.preventDefault()
     const file = e.dataTransfer.files?.[0]
     if (file && file.type.startsWith('image/')) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size must be less than 10MB');
+        return;
+      }
       const previewUrl = URL.createObjectURL(file)
       setSelectedImage(previewUrl)
+      setSelectedFile(file)
     }
   }
 
   const handleUpload = async () => {
-    if (!selectedImage) return
+    if (!selectedFile || !proofObjectId) {
+      toast.error('No file selected or proof object ID not set');
+      return;
+    }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const result = await uploadImage(selectedImage)
+      const signer = wallet.signer; // Lấy từ wallet connection của bạn
+      const result = await uploadToWalrus(selectedFile, epochs, selectedDay, proofObjectId, signer);
+
       if (result.success) {
-        toast.success('Upload successful!')
-        setContractAddress(result.contractAddress)
+        toast.success('Upload successful!');
+        setContractAddress(result.blobId);
       } else {
-        toast.error(result.message)
+        toast.error(result.message || 'Upload failed');
       }
     } catch (error) {
-      toast.error('Upload failed. Please try again.')
+      console.error("Upload error:", error);
+      toast.error('Upload failed. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const resetUpload = () => {
     setSelectedImage(null)
+    setSelectedFile(null)
     setContractAddress(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -136,6 +158,26 @@ function App() {
                       accept="image/*"
                       className="hidden"
                     />
+
+                    <div className="space-y-4">
+                      <select
+                        value={selectedDay}
+                        onChange={(e) => setSelectedDay(Number(e.target.value))}
+                        className="w-full p-2 rounded"
+                      >
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(day => (
+                          <option key={day} value={day}>Day {day}</option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="text"
+                        value={proofObjectId || ''}
+                        onChange={(e) => setProofObjectId(e.target.value)}
+                        placeholder="Enter your Proof Object ID"
+                        className="w-full p-2 rounded"
+                      />
+                    </div>
                   </>
                 )}
               </div>
